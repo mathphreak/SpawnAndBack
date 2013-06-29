@@ -1,0 +1,20 @@
+[
+	{
+		"modid": "math_sab",
+		"name": "Spawn and Back",
+		"description": "Teleport to spawn, and then back!",
+		"version": "0.0.1",
+		"url": "http://github.com/mathphreak/SpawnAndBack",
+		"updateUrl": "",
+		"authorList": [
+			"mathphreak"
+		],
+		"credits": "Slowpoke and the FTB team for being awesome, and Pahimar for his Let's Mod series",
+		"logoFile": "",
+		"screenshots": [
+		],
+		"parent": "",
+		"dependencies": [
+		]
+	}
+]
