@@ -6,7 +6,8 @@ public abstract class Reference {
         public static final String SPAWN_X_KEY = "spawnX";
         public static final String SPAWN_Y_KEY = "spawnY";
         public static final String SPAWN_Z_KEY = "spawnZ";
-        public static final double DEFAULT_VALUE = 0;
+        public static final String FORGET_KEY = "forgetBackPositionAfterUse";
+        public static final double INVALID_SPAWN_VALUE = -1;
     }
     
     // mod info

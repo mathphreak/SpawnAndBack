@@ -4,8 +4,6 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-import org.lwjgl.util.vector.Vector2f;
-
 import com.github.mathphreak.spawnandback.SpawnAndBack;
 import com.github.mathphreak.spawnandback.util.Vector3;
 
@@ -13,8 +11,7 @@ public class CommandBack extends CommandBase {
     
     @Override
     public boolean canCommandSenderUseCommand(final ICommandSender par1iCommandSender) {
-        // TODO Auto-generated method stub
-        return super.canCommandSenderUseCommand(par1iCommandSender);
+        return par1iCommandSender instanceof EntityPlayerMP;
     }
     
     @Override
@@ -33,10 +30,15 @@ public class CommandBack extends CommandBase {
             final EntityPlayerMP player = (EntityPlayerMP) var1;
             final String username = player.username;
             final Vector3 position = SpawnAndBack.instance.lastPositions.get(username);
-            final Vector2f look = SpawnAndBack.instance.lastLookingThings.get(username);
-            player.setAngles(look.x, look.y);
+            if (position == null) {
+                player.sendChatToPlayer("You haven't used /spawn yet, so there's nowhere for you to go back to!");
+                return;
+            }
             player.setPositionAndUpdate(position.x, position.y, position.z);
             player.sendChatToPlayer("You are back!");
+            if (SpawnAndBack.instance.forgetBackPositionAfterUse) {
+                SpawnAndBack.instance.lastPositions.remove(username);
+            }
         }
     }
 }

@@ -5,8 +5,6 @@ import java.util.HashMap;
 
 import net.minecraftforge.common.Configuration;
 
-import org.lwjgl.util.vector.Vector2f;
-
 import com.github.mathphreak.spawnandback.command.CommandBack;
 import com.github.mathphreak.spawnandback.command.CommandSetSpawn;
 import com.github.mathphreak.spawnandback.command.CommandSpawn;
@@ -31,17 +29,21 @@ public class SpawnAndBack {
     public static SpawnAndBack instance;
     
     public HashMap<String, Vector3> lastPositions;
-    public HashMap<String, Vector2f> lastLookingThings;
     
-    public double spawnX = Reference.CONFIG.DEFAULT_VALUE;
-    public double spawnY = Reference.CONFIG.DEFAULT_VALUE;
-    public double spawnZ = Reference.CONFIG.DEFAULT_VALUE;
+    public double spawnX = Reference.CONFIG.INVALID_SPAWN_VALUE;
+    public double spawnY = Reference.CONFIG.INVALID_SPAWN_VALUE;
+    public double spawnZ = Reference.CONFIG.INVALID_SPAWN_VALUE;
+    public boolean forgetBackPositionAfterUse = false;
     
     private File configFile;
     
     @Init
     public void init(final FMLInitializationEvent event) {
-        // do stuff
+        lastPositions = new HashMap<String, Vector3>();
+    }
+    
+    public boolean isSpawnValid() {
+        return !(spawnX == spawnY && spawnY == spawnZ && spawnZ == Reference.CONFIG.INVALID_SPAWN_VALUE);
     }
     
     @PostInit
@@ -55,17 +57,23 @@ public class SpawnAndBack {
         
         // also, mess with config
         configFile = event.getSuggestedConfigurationFile();
+        saveAndOrLoadConfig();
+    }
+    
+    private void saveAndOrLoadConfig() {
         final Configuration config = new Configuration(configFile);
         config.load();
-        final double defaultValue = Reference.CONFIG.DEFAULT_VALUE;
-        spawnX = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_X_KEY, spawnX).getDouble(defaultValue);
-        spawnY = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_Y_KEY, spawnY).getDouble(defaultValue);
-        spawnZ = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_Z_KEY, spawnZ).getDouble(defaultValue);
+        spawnX = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_X_KEY, spawnX).getDouble(spawnX);
+        spawnY = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_Y_KEY, spawnY).getDouble(spawnY);
+        spawnZ = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_Z_KEY, spawnZ).getDouble(spawnZ);
+        forgetBackPositionAfterUse = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.FORGET_KEY, forgetBackPositionAfterUse,
+                "Keep people from abusing /back to teleport home whenever they feel like it").getBoolean(forgetBackPositionAfterUse);
         config.save();
     }
     
     public void saveSpawnInConfig() {
         configFile.delete();
+        saveAndOrLoadConfig();
     }
     
     @ServerStarting
