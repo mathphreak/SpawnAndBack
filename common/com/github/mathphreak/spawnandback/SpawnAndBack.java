@@ -9,6 +9,7 @@ import com.github.mathphreak.spawnandback.command.CommandBack;
 import com.github.mathphreak.spawnandback.command.CommandSetSpawn;
 import com.github.mathphreak.spawnandback.command.CommandSpawn;
 import com.github.mathphreak.spawnandback.lib.Reference;
+import com.github.mathphreak.spawnandback.network.PlayerConnectionMovifier;
 import com.github.mathphreak.spawnandback.util.Vector3;
 
 import cpw.mods.fml.common.Mod;
@@ -21,6 +22,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.network.NetworkRegistry;
 
 @Mod(modid = Reference.MOD_INFO.ID, name = Reference.MOD_INFO.NAME, version = Reference.MOD_INFO.VERSION)
 public class SpawnAndBack {
@@ -40,6 +42,8 @@ public class SpawnAndBack {
     @Init
     public void init(final FMLInitializationEvent event) {
         lastPositions = new HashMap<String, Vector3>();
+        
+        NetworkRegistry.instance().registerConnectionHandler(new PlayerConnectionMovifier());
     }
     
     public boolean isSpawnValid() {
