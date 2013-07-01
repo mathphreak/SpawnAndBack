@@ -6,11 +6,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 import com.github.mathphreak.spawnandback.SpawnAndBack;
 
-public class CommandSetSpawn extends CommandBase {
+public class CommandSetFirstSpawn extends CommandBase {
     
     @Override
     public String getCommandName() {
-        return "setspawn";
+        return "setfirstspawn";
     }
     
     @Override
@@ -21,10 +21,13 @@ public class CommandSetSpawn extends CommandBase {
     @Override
     public void processCommand(final ICommandSender var1, final String[] var2) {
         final EntityPlayerMP player = getCommandSenderAsPlayer(var1);
-        SpawnAndBack.instance.spawnX = player.posX;
-        SpawnAndBack.instance.spawnY = player.posY;
-        SpawnAndBack.instance.spawnZ = player.posZ;
-        player.sendChatToPlayer("\u00A7oSpawn has been set to your current position.");
+        SpawnAndBack.instance.firstSpawnX = player.posX;
+        SpawnAndBack.instance.firstSpawnY = player.posY;
+        SpawnAndBack.instance.firstSpawnZ = player.posZ;
+        player.sendChatToPlayer("\u00A7oFirst spawn has been set to your current position.");
+        if (!SpawnAndBack.instance.firstSpawnEnabled) {
+            player.sendChatToPlayer("\u00A7e\u00A7oWARNING: First spawn is disabled in " + SpawnAndBack.instance.configFile.getName());
+        }
         SpawnAndBack.instance.saveConfig();
     }
 }

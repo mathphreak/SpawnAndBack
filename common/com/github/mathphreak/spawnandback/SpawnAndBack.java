@@ -6,6 +6,7 @@ import java.util.HashMap;
 import net.minecraftforge.common.Configuration;
 
 import com.github.mathphreak.spawnandback.command.CommandBack;
+import com.github.mathphreak.spawnandback.command.CommandSetFirstSpawn;
 import com.github.mathphreak.spawnandback.command.CommandSetSpawn;
 import com.github.mathphreak.spawnandback.command.CommandSpawn;
 import com.github.mathphreak.spawnandback.lib.Reference;
@@ -32,26 +33,37 @@ public class SpawnAndBack {
     
     public HashMap<String, Vector3> lastPositions;
     
-    public double spawnX = Reference.CONFIG.INVALID_SPAWN_VALUE;
-    public double spawnY = Reference.CONFIG.INVALID_SPAWN_VALUE;
-    public double spawnZ = Reference.CONFIG.INVALID_SPAWN_VALUE;
+    public boolean spawnEnabled = true;
+    public double spawnX = Reference.SPAWN_CONFIG.INVALID_VALUE;
+    public double spawnY = Reference.SPAWN_CONFIG.INVALID_VALUE;
+    public double spawnZ = Reference.SPAWN_CONFIG.INVALID_VALUE;
     public boolean forgetBackPositionAfterUse = false;
+    public boolean spawnIsFirstSpawn = true;
     
-    private File configFile;
+    public boolean firstSpawnEnabled = false;
+    public double firstSpawnX = Reference.FIRST_SPAWN_CONFIG.INVALID_VALUE;
+    public double firstSpawnY = Reference.FIRST_SPAWN_CONFIG.INVALID_VALUE;
+    public double firstSpawnZ = Reference.FIRST_SPAWN_CONFIG.INVALID_VALUE;
+    
+    public File configFile;
     
     @Init
-    public void init(final FMLInitializationEvent event) {
+    public void init(@SuppressWarnings("unused") final FMLInitializationEvent event) {
         lastPositions = new HashMap<String, Vector3>();
         
         NetworkRegistry.instance().registerConnectionHandler(new PlayerConnectionMovifier());
     }
     
+    public boolean isFirstSpawnValid() {
+        return firstSpawnY != Reference.FIRST_SPAWN_CONFIG.INVALID_VALUE;
+    }
+    
     public boolean isSpawnValid() {
-        return !(spawnX == spawnY && spawnY == spawnZ && spawnZ == Reference.CONFIG.INVALID_SPAWN_VALUE);
+        return spawnY != Reference.SPAWN_CONFIG.INVALID_VALUE;
     }
     
     @PostInit
-    public void postInit(final FMLPostInitializationEvent event) {
+    public void postInit(@SuppressWarnings("unused") final FMLPostInitializationEvent event) {
         // interact with other mods
     }
     
@@ -67,15 +79,24 @@ public class SpawnAndBack {
     private void saveAndOrLoadConfig() {
         final Configuration config = new Configuration(configFile);
         config.load();
-        spawnX = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_X_KEY, spawnX).getDouble(spawnX);
-        spawnY = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_Y_KEY, spawnY).getDouble(spawnY);
-        spawnZ = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.SPAWN_Z_KEY, spawnZ).getDouble(spawnZ);
-        forgetBackPositionAfterUse = config.get(Configuration.CATEGORY_GENERAL, Reference.CONFIG.FORGET_KEY, forgetBackPositionAfterUse,
+        final String spawnCategory = Reference.SPAWN_CONFIG.CATEGORY;
+        spawnEnabled = config.get(spawnCategory, Reference.SPAWN_CONFIG.ENABLED_KEY, spawnEnabled).getBoolean(spawnEnabled);
+        spawnX = config.get(spawnCategory, Reference.SPAWN_CONFIG.X_KEY, spawnX).getDouble(spawnX);
+        spawnY = config.get(spawnCategory, Reference.SPAWN_CONFIG.Y_KEY, spawnY).getDouble(spawnY);
+        spawnZ = config.get(spawnCategory, Reference.SPAWN_CONFIG.Z_KEY, spawnZ).getDouble(spawnZ);
+        forgetBackPositionAfterUse = config.get(spawnCategory, Reference.SPAWN_CONFIG.FORGET_KEY, forgetBackPositionAfterUse,
                 "Keep people from abusing /back to teleport home whenever they feel like it").getBoolean(forgetBackPositionAfterUse);
+        spawnIsFirstSpawn = config.get(spawnCategory, Reference.SPAWN_CONFIG.FIRST_KEY, spawnIsFirstSpawn,
+                "Teleport players to spawn when they first connect").getBoolean(spawnIsFirstSpawn);
+        final String firstSpawnCategory = Reference.FIRST_SPAWN_CONFIG.CATEGORY;
+        firstSpawnEnabled = config.get(firstSpawnCategory, Reference.FIRST_SPAWN_CONFIG.ENABLED_KEY, firstSpawnEnabled).getBoolean(firstSpawnEnabled);
+        firstSpawnX = config.get(firstSpawnCategory, Reference.FIRST_SPAWN_CONFIG.X_KEY, firstSpawnX).getDouble(firstSpawnX);
+        firstSpawnY = config.get(firstSpawnCategory, Reference.FIRST_SPAWN_CONFIG.Y_KEY, firstSpawnY).getDouble(firstSpawnY);
+        firstSpawnZ = config.get(firstSpawnCategory, Reference.FIRST_SPAWN_CONFIG.Z_KEY, firstSpawnZ).getDouble(firstSpawnZ);
         config.save();
     }
     
-    public void saveSpawnInConfig() {
+    public void saveConfig() {
         configFile.delete();
         saveAndOrLoadConfig();
     }
@@ -83,6 +104,7 @@ public class SpawnAndBack {
     @ServerStarting
     public void serverStarting(final FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandBack());
+        event.registerServerCommand(new CommandSetFirstSpawn());
         event.registerServerCommand(new CommandSetSpawn());
         event.registerServerCommand(new CommandSpawn());
     }
